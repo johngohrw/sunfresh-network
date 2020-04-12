@@ -13,7 +13,7 @@ import datetime
 # VARIABLES
 #===================================
 
-chrome_driver_path = './drivers/chromedriver'
+chrome_driver_path = './drivers/chromedriver_linux'
 username_credentials = 'andyyap@sunfresh.my'
 password_credentials = 'Sunfresh2020'
 shopify_store_name = 'wefresh-by-webay-group'
