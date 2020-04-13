@@ -54,8 +54,8 @@ class SeleniumController:
 
         if os.getenv('HEADLESS') == '1':
             self.debug_print('Running Chrome in headless mode')
-            ua = UserAgent()
-            chrome_options.add_argument(f'user-agent={ua.random}')
+            # ua = UserAgent()
+            # chrome_options.add_argument(f'user-agent={ua.random}')
             chrome_options.add_argument('--headless')
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--disable-dev-shm-usage')
