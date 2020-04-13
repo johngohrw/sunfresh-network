@@ -41,6 +41,7 @@ class SeleniumController:
         self.debug_print("Loading webdriver from {}".format(chrome_driver_path))
         # starts xvfb virtual display for linux servers without an actual display output
         if os.getenv('ENABLE_VIRTUAL_DISPLAY') == 1:
+            self.debug_print('Starting pyvirtualdisplay')
             self.virtual_display = Display(visible=0, size=(800, 600))
             self.virtual_display.start()
 
