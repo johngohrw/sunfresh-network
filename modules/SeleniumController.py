@@ -90,15 +90,19 @@ class SeleniumController:
             .send_keys(username_credentials) \
             .perform()
 
+        next_elem = self.browser.find_element_by_xpath("//button[@type='submit']")
+        print(next_elem.screenshot_as_base64)
+
         try:
-            elem = WebDriverWait(self.browser, self.wait_timeout).until(
+            newelem = WebDriverWait(self.browser, self.wait_timeout).until(
                 EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']")))
         except TimeoutException:
             self.debug_print("Next elem not clickable!")
-            print(elem.screenshot_as_base64)
+            # print(newelem.screenshot_as_base64)
             return False
 
         next_elem = self.browser.find_element_by_xpath("//button[@type='submit']")
+        # print(newelem.screenshot_as_base64)
         next_elem.click()
 
         # Wait for password field
