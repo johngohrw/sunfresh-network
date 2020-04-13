@@ -58,10 +58,21 @@ class SeleniumController:
 
     def close_browser(self):
         self.browser.close()
+        self.browser.quit()
         self.debug_print("Browser closed")
         if os.getenv('ENABLE_VIRTUAL_DISPLAY') == '1':
             self.virtual_display.stop()
         return True
+
+    def debug_print(self, string):
+        prefix = "[Selenium] "
+        if self.debug: print(prefix + string)
+
+    def load_page(self, url):
+        self.debug_print("Loading page: {}".format(url))
+        self.browser.get(url)
+        self.debug_print("Loaded successfully!")
+        time.sleep(self.page_load_interval)
 
     # Shopify login process
     def shopify_login(self):
@@ -266,15 +277,6 @@ class SeleniumController:
         print("Secomapp Login Success!")
         return True
 
-    def debug_print(self, string):
-        prefix = "[Selenium] "
-        if self.debug: print(prefix + string)
-
-    def load_page(self, url):
-        self.debug_print("Loading page: {}".format(url))
-        self.browser.get(url)
-        self.debug_print("Loaded successfully!")
-        time.sleep(self.page_load_interval)
 
 
 if __name__ == "__main__":
