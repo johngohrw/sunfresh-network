@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver import ActionChains
@@ -15,6 +16,7 @@ load_dotenv()
 
 
 # VARIABLES
+
 chrome_driver_path = './drivers/chromedriver_{}'.format(os.getenv('HOST_OS'))
 username_credentials = 'andyyap@sunfresh.my'
 password_credentials = 'Sunfresh2020'
@@ -29,7 +31,12 @@ class SeleniumController():
         self.debug = True
         self.page_load_delay = 5
         if self.debug: print("[Selenium] Loading webdriver from {}".format(chrome_driver_path))
-        self.browser = webdriver.Chrome(executable_path=chrome_driver_path)
+
+        self.chrome_options = Options()
+        self.chrome_options.add_argument('--headless')
+        self.chrome_options.add_argument('--no-sandbox')
+        self.chrome_options.add_argument('--disable-dev-shm-usage')
+        self.browser = webdriver.Chrome(executable_path=chrome_driver_path, chrome_options=self.chrome_options)
         self.browser.set_page_load_timeout(30)
         time.sleep(3)
 
