@@ -40,7 +40,6 @@ class SeleniumController:
     def start_browser(self):
         self.debug_print("Loading webdriver from {}".format(chrome_driver_path))
         # starts xvfb virtual display for linux servers without an actual display output
-        print(os.getenv('ENABLE_VIRTUAL_DISPLAY'))
         if os.getenv('ENABLE_VIRTUAL_DISPLAY') == '1':
             self.debug_print('Starting pyvirtualdisplay')
             self.virtual_display = Display(visible=0, size=(800, 600))
@@ -48,7 +47,6 @@ class SeleniumController:
 
         # add headless arguments if HEADLESS env variable is set to 1
         chrome_options = Options()
-        print(os.getenv('HEADLESS'))
         if os.getenv('HEADLESS') == '1':
             self.debug_print('Running Chrome in headless mode')
             chrome_options.add_argument('--headless')
@@ -69,6 +67,9 @@ class SeleniumController:
     def shopify_login(self):
         self.debug_print("Starting Shopify login")
         self.load_page('https://{}.myshopify.com/admin'.format(shopify_store_name))
+
+        # let the page load
+        time.sleep(self.page_load_delay)
 
         # wait for email field
         try:
