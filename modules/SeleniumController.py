@@ -9,6 +9,7 @@ import time
 import os
 from pyvirtualdisplay import Display
 from dotenv import load_dotenv
+from fake_useragent import UserAgent
 load_dotenv()
 
 # VARIABLES
@@ -43,13 +44,18 @@ class SeleniumController:
         # starts xvfb virtual display for linux servers without an actual display output
         if os.getenv('ENABLE_VIRTUAL_DISPLAY') == '1':
             self.debug_print('Starting pyvirtualdisplay')
-            self.virtual_display = Display(visible=0, size=(1600, 900))
+            self.virtual_display = Display(visible=0, size=(1243, 722))
             self.virtual_display.start()
+
+
 
         # add headless arguments if HEADLESS env variable is set to 1
         chrome_options = Options()
+
         if os.getenv('HEADLESS') == '1':
             self.debug_print('Running Chrome in headless mode')
+            ua = UserAgent()
+            chrome_options.add_argument(f'user-agent={ua.random}')
             chrome_options.add_argument('--headless')
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--disable-dev-shm-usage')
@@ -83,12 +89,13 @@ class SeleniumController:
 
         # Page load success, input email
         self.debug_print("Inputting email")
-        email_elem = self.browser.find_element_by_xpath("//input[@id='account_email']")
 
-        ActionChains(self.browser) \
-            .move_to_element(email_elem).click() \
-            .send_keys(username_credentials) \
-            .perform()
+        for i in range(len(username_credentials)):
+            comment = self.browser.find_element_by_xpath("//input[@id='account_email']")
+            comment.send_keys(username_credentials[i])
+            time.sleep(0.7)
+
+        self.debug_print("Email input done")
 
         next_elem = self.browser.find_element_by_xpath("//button[@type='submit']")
         print(next_elem.screenshot_as_base64)
