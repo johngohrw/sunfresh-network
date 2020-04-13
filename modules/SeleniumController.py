@@ -21,9 +21,9 @@ shopify_store_name = os.getenv('SHOPIFY_STORE_NAME')
 
 class SeleniumController:
     def __init__(self):
-        self.page_load_delay = 5
-        self.page_load_interval = 5
-        self.action_interval = 5
+        self.page_load_delay = 4
+        self.page_load_interval = 4
+        self.action_interval = 4
         self.wait_timeout = 20
         self.debug = True
 
@@ -93,7 +93,7 @@ class SeleniumController:
         for i in range(len(username_credentials)):
             comment = self.browser.find_element_by_xpath("//input[@id='account_email']")
             comment.send_keys(username_credentials[i])
-            time.sleep(0.7)
+            time.sleep(0.2)
 
         self.debug_print("Email input done")
 
