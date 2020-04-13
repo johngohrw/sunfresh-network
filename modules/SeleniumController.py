@@ -42,7 +42,7 @@ class SeleniumController:
         # starts xvfb virtual display for linux servers without an actual display output
         if os.getenv('ENABLE_VIRTUAL_DISPLAY') == '1':
             self.debug_print('Starting pyvirtualdisplay')
-            self.virtual_display = Display(visible=1, size=(1200, 800))
+            self.virtual_display = Display(visible=1, size=(1600, 900))
             self.virtual_display.start()
 
         # add headless arguments if HEADLESS env variable is set to 1
