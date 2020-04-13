@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import ActionChains
+from selenium.common.exceptions import TimeoutException
 import time
 import os
 from pyvirtualdisplay import Display
@@ -75,7 +76,7 @@ class SeleniumController:
         try:
             elem = WebDriverWait(self.browser, self.wait_timeout).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, 'input.next-input.email-typo-input')))
-        except TimeoutError:
+        except TimeoutException:
             self.debug_print("Loading login page took too much time!")
             return False
         assert "accounts.shopify.com" in self.browser.current_url
@@ -93,7 +94,7 @@ class SeleniumController:
         try:
             elem = WebDriverWait(self.browser, self.wait_timeout).until(
                 EC.element_to_be_clickable((By.XPATH, "//button[@type='submit'][@name='commit']")))
-        except TimeoutError:
+        except TimeoutException:
             self.debug_print("Next elem not clickable!")
             return False
 
@@ -103,7 +104,7 @@ class SeleniumController:
         try:
             elem = WebDriverWait(self.browser, self.wait_timeout).until(
                 EC.presence_of_element_located((By.XPATH, "//input[@name='account[password]']")))
-        except TimeoutError:
+        except TimeoutException:
             self.debug_print("Password field took too much time!")
             return False
 
@@ -127,7 +128,7 @@ class SeleniumController:
         try:
             elem = WebDriverWait(self.browser, self.wait_timeout).until(
                 EC.presence_of_element_located((By.XPATH, "//input[@type='search'][@placeholder='Search']")))
-        except TimeoutError:
+        except TimeoutException:
             self.debug_print("Logging into Shopify took too much time!")
             return False
         print("Shopify Login Success!")
@@ -142,7 +143,7 @@ class SeleniumController:
         try:
             elem = WebDriverWait(self.browser, self.wait_timeout).until(
                 EC.presence_of_element_located((By.XPATH, "//input[@name='shop'][@placeholder='shop name']")))
-        except TimeoutError:
+        except TimeoutException:
             self.debug_print("Loading login page took too much time!")
             return False
 
@@ -166,7 +167,7 @@ class SeleniumController:
         try:
             elem = WebDriverWait(self.browser, self.wait_timeout).until(
                 EC.presence_of_element_located((By.XPATH, "//title[text()='Dashboard']")))
-        except TimeoutError:
+        except TimeoutException:
             self.debug_print("Logging into Secomapp took too much time!")
             return False
         print("Secomapp Login Success!")
