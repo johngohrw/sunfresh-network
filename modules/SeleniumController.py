@@ -84,7 +84,6 @@ class SeleniumController:
         # Page load success, input email
         self.debug_print("Inputting email")
         email_elem = self.browser.find_element_by_xpath("//input[@id='account_email']")
-        next_elem = self.browser.find_element_by_xpath("//button[@type='submit'][@name='commit']")
 
         ActionChains(self.browser) \
             .move_to_element(email_elem).click() \
@@ -93,12 +92,13 @@ class SeleniumController:
 
         try:
             elem = WebDriverWait(self.browser, self.wait_timeout).until(
-                EC.element_to_be_clickable((By.XPATH, "//button[@type='submit'][@name='commit']")))
+                EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']")))
         except TimeoutException:
             self.debug_print("Next elem not clickable!")
             print(elem)
             return False
 
+        next_elem = self.browser.find_element_by_xpath("//button[@type='submit']")
         next_elem.click()
 
         # Wait for password field
