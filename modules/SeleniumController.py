@@ -40,6 +40,7 @@ class SeleniumController:
     def start_browser(self):
         self.debug_print("Loading webdriver from {}".format(chrome_driver_path))
         # starts xvfb virtual display for linux servers without an actual display output
+        print(os.getenv('ENABLE_VIRTUAL_DISPLAY'))
         if os.getenv('ENABLE_VIRTUAL_DISPLAY') == 1:
             self.debug_print('Starting pyvirtualdisplay')
             self.virtual_display = Display(visible=0, size=(800, 600))
@@ -47,7 +48,9 @@ class SeleniumController:
 
         # add headless arguments if HEADLESS env variable is set to 1
         chrome_options = Options()
+        print(os.getenv('HEADLESS'))
         if os.getenv('HEADLESS') == 1:
+            self.debug_print('Running Chrome in headless mode')
             chrome_options.add_argument('--headless')
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--disable-dev-shm-usage')
