@@ -95,7 +95,7 @@ class SeleniumController:
                 EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']")))
         except TimeoutException:
             self.debug_print("Next elem not clickable!")
-            print(elem)
+            print(elem.screenshot_as_base64)
             return False
 
         next_elem = self.browser.find_element_by_xpath("//button[@type='submit']")
