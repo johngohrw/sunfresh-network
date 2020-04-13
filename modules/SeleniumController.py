@@ -9,7 +9,6 @@ import time
 import os
 from pyvirtualdisplay import Display
 from dotenv import load_dotenv
-from fake_useragent import UserAgent
 load_dotenv()
 
 # VARIABLES
@@ -46,16 +45,10 @@ class SeleniumController:
             self.debug_print('Starting pyvirtualdisplay')
             self.virtual_display = Display(visible=0, size=(1243, 722))
             self.virtual_display.start()
-
-
-
         # add headless arguments if HEADLESS env variable is set to 1
         chrome_options = Options()
-
         if os.getenv('HEADLESS') == '1':
             self.debug_print('Running Chrome in headless mode')
-            # ua = UserAgent()
-            # chrome_options.add_argument(f'user-agent={ua.random}')
             chrome_options.add_argument('--headless')
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--disable-dev-shm-usage')
@@ -147,7 +140,7 @@ class SeleniumController:
         return True
 
     # Secomapp login process
-    def secomapp_login(self):
+    def secomapp_login_after_shopify(self):
         self.debug_print("Starting Secomapp login")
         self.load_page('https://af.secomapp.com/login')
 
@@ -185,6 +178,94 @@ class SeleniumController:
         print("Secomapp Login Success!")
         return True
 
+    def secomapp_login(self):
+        secomapp_username = os.getenv('SECOMAPP_USERNAME')
+        secomapp_password = os.getenv('SECOMAPP_PASSWORD')
+
+        self.debug_print("Starting Secomapp login")
+        self.load_page('https://af.secomapp.com/login')
+
+        # wait for login by password button
+        self.debug_print("Waiting to click 'login by password'")
+        try:
+            elem = WebDriverWait(self.browser, self.wait_timeout).until(
+                EC.presence_of_element_located((By.XPATH, "//a[@id='login_by_password']")))
+        except TimeoutException:
+            self.debug_print("'login by password' took too much time!")
+            return False
+
+        self.debug_print("Clicking 'login by password'")
+        next_elem = self.browser.find_element_by_xpath("//a[@id='login_by_password']")
+        next_elem.click()
+
+        self.debug_print("Waiting for type='email' field")
+        try:
+            elem = WebDriverWait(self.browser, self.wait_timeout).until(
+                EC.presence_of_element_located((By.XPATH, "//input[@type='email']")))
+        except TimeoutException:
+            self.debug_print("type='email' field took too much time!")
+            return False
+
+        self.debug_print("Inputting username")
+        email_field = self.browser.find_element_by_xpath("//input[@type='email']")
+        email_field.clear()
+        for i in range(len(secomapp_username)):
+            email_field.send_keys(secomapp_username[i])
+            time.sleep(0.05)
+        self.debug_print("Inputting password")
+        password_field = self.browser.find_element_by_xpath("//input[@type='password']")
+        password_field.clear()
+        for i in range(len(secomapp_password)):
+            password_field.send_keys(secomapp_password[i])
+            time.sleep(0.05)
+
+        self.debug_print("Form submission")
+        next_elem = self.browser.find_element_by_xpath("//button[@type='submit']")
+        next_elem.click()
+
+        # wait for page load
+        self.debug_print('Waiting page load..')
+        time.sleep(self.page_load_delay)
+
+        self.debug_print("Waiting for type='email' field")
+        try:
+            elem = WebDriverWait(self.browser, self.wait_timeout).until(
+                EC.presence_of_element_located((By.XPATH, "//input[@type='email']")))
+        except TimeoutException:
+            self.debug_print("type='email' field took too much time!")
+            return False
+
+        self.debug_print("Inputting username")
+        email_field = self.browser.find_element_by_xpath("//input[@type='email']")
+        email_field.clear()
+        for i in range(len(secomapp_username)):
+            email_field.send_keys(secomapp_username[i])
+            time.sleep(0.05)
+        self.debug_print("Inputting password")
+        password_field = self.browser.find_element_by_xpath("//input[@type='password']")
+        password_field.clear()
+        for i in range(len(secomapp_password)):
+            password_field.send_keys(secomapp_password[i])
+            time.sleep(0.05)
+
+        self.debug_print("Form submission")
+        next_elem = self.browser.find_element_by_xpath("//button[@type='submit']")
+        next_elem.click()
+
+        # wait for page load
+        self.debug_print('Waiting page load..')
+        time.sleep(self.page_load_delay)
+
+        # check if properly signed in
+        try:
+            elem = WebDriverWait(self.browser, self.wait_timeout).until(
+                EC.presence_of_element_located((By.XPATH, "//title[text()='Dashboard']")))
+        except TimeoutException:
+            self.debug_print("Logging into Secomapp took too much time!")
+            return False
+        print("Secomapp Login Success!")
+        return True
+
     def debug_print(self, string):
         prefix = "[Selenium] "
         if self.debug: print(prefix + string)
@@ -200,5 +281,5 @@ if __name__ == "__main__":
     print("SeleniumController debug run")
     c = SeleniumController()
     c.start_browser()
-    c.login_all()
+    c.secomapp_login()
     c.close_browser()
