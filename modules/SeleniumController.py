@@ -27,7 +27,6 @@ class SeleniumController:
 
         # uninitialized variables
         self.virtual_display = None
-        self.chrome_options = None
         self.browser = None
 
     def login_all(self):
