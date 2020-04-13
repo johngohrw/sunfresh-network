@@ -1,6 +1,5 @@
 from tinydb import TinyDB, Query
 
-
 class TinyDBController:
     def __init__(self, table_path='./tables', debug=True):
         print("[TinyDB] Controller initialized!")
