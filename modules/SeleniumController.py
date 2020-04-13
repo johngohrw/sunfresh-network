@@ -96,6 +96,7 @@ class SeleniumController:
                 EC.element_to_be_clickable((By.XPATH, "//button[@type='submit'][@name='commit']")))
         except TimeoutException:
             self.debug_print("Next elem not clickable!")
+            print(elem)
             return False
 
         next_elem.click()
