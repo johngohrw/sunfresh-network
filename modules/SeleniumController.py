@@ -89,6 +89,14 @@ class SeleniumController:
             .move_to_element(email_elem).click() \
             .send_keys(username_credentials) \
             .perform()
+
+        try:
+            elem = WebDriverWait(self.browser, self.wait_timeout).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[@type='submit'][@name='commit']")))
+        except TimeoutError:
+            self.debug_print("Next elem not clickable!")
+            return False
+
         next_elem.click()
 
         # Wait for password field
