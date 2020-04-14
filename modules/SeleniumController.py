@@ -84,7 +84,7 @@ class SeleniumController:
         wrapping_elem = self.browser.find_element_by_xpath("//pre")
         response = wrapping_elem.text
         response_obj = json.loads(response)
-        self.debug_print("Done.")
+        # self.debug_print("Done.")
         return response_obj
 
     # Shopify login process
@@ -291,10 +291,9 @@ class SeleniumController:
         return True
 
 
-
-if __name__ == "__main__":
-    print("SeleniumController debug run")
-    c = SeleniumController()
-    c.start_browser()
-    c.secomapp_login()
-    c.close_browser()
+# if __name__ == "__main__":
+#     print("SeleniumController debug run")
+#     c = SeleniumController()
+#     c.start_browser()
+#     c.secomapp_login()
+#     c.close_browser()

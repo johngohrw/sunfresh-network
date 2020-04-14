@@ -60,6 +60,7 @@ class NetworkController:
 
     # builds user network from scratch
     def build_network(self):
+        self.debug_print("Building network..")
         self.db.tables['user'].purge_tables()  # clears all entries in table
         all_users = self.get_all_users()
         for user in all_users:
@@ -72,11 +73,22 @@ class NetworkController:
                 'parent_id': user_info['parent_id'],
                 'children': [],
             })
-        # for user in all_users:
-        #     parent_id = user['parent_id']
+        self.debug_print("Users fetched, connecting parent and child nodes")
+        for user in all_users:
+            user_id = user['id']
+            # get current user's parent id from local db
+            user_db_obj = self.db.search('user', 'id', user_id)[0]
+            parent_id = user_db_obj['parent_id']
+            # if this user has a parent
+            if parent_id > 0:
+                # append this user's id to its parent's children list
+                parent_object = self.db.search('user', 'parent_id', parent_id)[0]
+                children_list = parent_object['children']
+                children_list.append(user['id'])
+                self.db.update('user', 'id', parent_id, 'children', children_list)
+                self.debug_print('Linked  {} --> {}'.format(user_id, parent_id))
 
         self.debug_print("Build network complete!")
-
 
     def get_user_info(self, user_id):
         payload = self.selenium.fetch_json('https://af.secomapp.com/admin/affiliates/{}'.format(user_id))
