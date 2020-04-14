@@ -5,6 +5,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import ActionChains
 from selenium.common.exceptions import TimeoutException
+import datetime
+import json
 import time
 import os
 from pyvirtualdisplay import Display
@@ -25,6 +27,7 @@ class SeleniumController:
         self.action_interval = 4
         self.wait_timeout = 20
         self.debug = True
+        # self.logging = True
 
         # uninitialized variables
         self.virtual_display = None
@@ -61,6 +64,7 @@ class SeleniumController:
         self.browser.quit()
         self.debug_print("Browser closed")
         if os.getenv('ENABLE_VIRTUAL_DISPLAY') == '1':
+            self.debug_print('Stopping pyvirtualdisplay..')
             self.virtual_display.stop()
         return True
 
@@ -73,6 +77,15 @@ class SeleniumController:
         self.browser.get(url)
         self.debug_print("Loaded successfully!")
         time.sleep(self.page_load_interval)
+
+    def fetch_json(self, url):
+        self.debug_print("Fetching JSON payload from {}".format(url))
+        self.browser.get(url)
+        wrapping_elem = self.browser.find_element_by_xpath("//pre")
+        response = wrapping_elem.text
+        response_obj = json.loads(response)
+        self.debug_print("Done.")
+        return response_obj
 
     # Shopify login process
     def shopify_login(self):

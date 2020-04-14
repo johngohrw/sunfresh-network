@@ -1,7 +1,7 @@
 from flask import *
-import io
 from modules.TinyDBController import TinyDBController
-import numpy as np
+from modules.SeleniumController import SeleniumController
+from modules.NetworkController import NetworkController
 
 # For nginx server...
 # app = Flask(__name__)
@@ -12,16 +12,29 @@ app = Flask(__name__, static_url_path='', static_folder='.',)
 # GLOBAL VARIABLES
 log_messages = [{'timestamp': '123 123', 'message': 'Hello world'}, {'timestamp': '124 124', 'message': 'Hello world again'}]
 
+'''
+# HOW TO USE TINYDBCONTROLLER:
+TinyDBObj.tables['user'].purge_tables()
+TinyDBObj.insert('user', {'name': 'a', 'age': 23})
+TinyDBObj.insert('user', {'name': 'b', 'age': 23})
+TinyDBObj.insert('user', {'name': 'c', 'age': 24})
+print(TinyDBObj.tables['user'].all())
+TinyDBObj.update('user', 'name', 'c', 'age', 99)
+'''
+
 
 def main():
-    TinyDBObj = TinyDBController()
-    TinyDBObj.load_tables(['user'])
-    TinyDBObj.tables['user'].purge_tables()
-    TinyDBObj.insert('user', {'name': 'a', 'age': 23})
-    TinyDBObj.insert('user', {'name': 'b', 'age': 23})
-    TinyDBObj.insert('user', {'name': 'c', 'age': 24})
-    print(TinyDBObj.tables['user'].all())
-    TinyDBObj.update('user', 'name', 'c', 'age', 99)
+    # start TinyDB process & load tables
+    db = TinyDBController()
+    db.load_tables(['user', 'logs'])
+
+    # start selenium headless browser & login to Secomapp
+    selenium = SeleniumController()
+    selenium.start_browser()
+    selenium.secomapp_login()
+
+    # run mlm network engine
+    mlm_network = NetworkController(db, selenium, 86400)
 
 
 def create_error_response(message, code):
