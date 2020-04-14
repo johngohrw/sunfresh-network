@@ -72,8 +72,8 @@ class NetworkController:
                 'parent_id': user_info['parent_id'],
                 'children': [],
             })
-        for user in all_users:
-            parent_id = user['parent_id']
+        # for user in all_users:
+        #     parent_id = user['parent_id']
 
         self.debug_print("Build network complete!")
 
