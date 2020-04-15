@@ -4,10 +4,10 @@ from modules.SeleniumController import SeleniumController
 from modules.NetworkController import NetworkController
 
 # For nginx server...
-app = Flask(__name__)
+# app = Flask(__name__)
 
 # For local server...
-# app = Flask(__name__, static_url_path='', static_folder='.',)
+app = Flask(__name__, static_url_path='', static_folder='.',)
 
 # GLOBAL VARIABLES
 log_messages = [{'timestamp': '123 123', 'message': 'Hello world'}, {'timestamp': '124 124', 'message': 'Hello world again'}]
