@@ -4,10 +4,10 @@ from modules.SeleniumController import SeleniumController
 from modules.NetworkController import NetworkController
 
 # For nginx server...
-# app = Flask(__name__)
+app = Flask(__name__)
 
 # For local server...
-app = Flask(__name__, static_url_path='', static_folder='.',)
+# app = Flask(__name__, static_url_path='', static_folder='.',)
 
 # GLOBAL VARIABLES
 log_messages = [{'timestamp': '123 123', 'message': 'Hello world'}, {'timestamp': '124 124', 'message': 'Hello world again'}]
@@ -29,12 +29,12 @@ def main():
     db.load_tables(['user', 'logs'])
 
     # start selenium headless browser & login to Secomapp
-    selenium = SeleniumController()
-    selenium.start_browser()
-    selenium.secomapp_login()
+    # selenium = SeleniumController()
+    # selenium.start_browser()
+    # selenium.secomapp_login()
 
     # run mlm network engine
-    mlm_network = NetworkController(db, selenium, 86400)
+    # mlm_network = NetworkController(db, selenium, 86400)
 
 
 def create_error_response(message, code):
@@ -67,4 +67,4 @@ def method_not_allowed(error):
 
 if __name__ == "__main__":
     main()
-    app.run()
+    app.run(port=5001)
