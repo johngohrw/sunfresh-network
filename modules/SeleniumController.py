@@ -5,6 +5,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import ActionChains
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import WebDriverException
+
 import datetime
 import json
 import time
@@ -67,6 +69,13 @@ class SeleniumController:
             self.debug_print('Stopping pyvirtualdisplay..')
             self.virtual_display.stop()
         return True
+
+    def browser_is_running(self):
+        try:
+            title = self.browser.title
+            return True
+        except WebDriverException:
+            return False
 
     def debug_print(self, string):
         prefix = "[Selenium] "

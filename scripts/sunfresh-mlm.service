@@ -1,0 +1,18 @@
+[Unit]
+Description=Flask instance to serve Sunfresh project
+After=network.target
+
+
+[Service]
+User=root
+Group=www-data
+WorkingDirectory=/var/www/sunfresh-referral-tracker/
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/miniconda3/envs/sunfresh-mlm/bin:/root/miniconda3/condabin"
+ExecStart=/root/miniconda3/envs/sunfresh-mlm/bin/python3 index.py
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+

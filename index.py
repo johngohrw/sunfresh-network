@@ -44,14 +44,15 @@ def create_error_response(message, code):
 
 @app.route("/")
 def homepage():
-    header = "<h2>Sunfresh Referral Tracker is up and running!</h2>"
+    title = "<h2>Sunfresh Referral Tracker is up and running!</h2>"
     status = "<p>Status: All good!</p>"
-    header = "<div style='position: sticky; top: 0; background-color: white;'>{}{}</div>".format(header, status)
+    header = "<div style='position: sticky; top: 0; background-color: white;'>{}{}</div>".format(title, status)
     log = ''
     for message in log_messages:
         log += '<li>{}: {}</li>'.format(message['timestamp'], message['message'])
     log = '<ul>{}</ul>'.format(log)
-    return header + log
+    # return header + log
+    return header
 
 
 @app.errorhandler(404)
