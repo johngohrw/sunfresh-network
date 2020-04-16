@@ -1,0 +1,1 @@
+/Users/semurnabiev/Projects/Duo/design-language/plex/zip/Source Code/v1.2.2/CHANGELOG.md
