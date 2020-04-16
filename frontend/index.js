@@ -4,7 +4,7 @@ const app = express();
 app.use(express.static('dashforge'));
 
 app.get('/', (req, res) => {
-    const fileName = '/template/sunfresh/dashboard.html';
+    const fileName = '/template/sunfresh/index.html';
     res.sendFile(fileName, options, function (err) {
         if (err) {
             next(err)
@@ -14,4 +14,4 @@ app.get('/', (req, res) => {
     })
 });
 
-app.listen(5070, () => console.log('mojo demo app listening on port 5070!'));
+app.listen(5070, () => console.log('sunfresh app listening on port 5070!'));
