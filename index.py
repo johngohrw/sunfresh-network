@@ -121,7 +121,7 @@ def rebuild_network():
 
 @app.route('/logs', methods=['GET'])
 def logs_endpoint():
-    latest_logs = db_engine.get_latest('logs', 80)
+    latest_logs = db_engine.get_latest('logs', 300)
     payload = {"logs": latest_logs}
     response = jsonify(payload)
     response.headers.add('Access-Control-Allow-Origin', '*')
