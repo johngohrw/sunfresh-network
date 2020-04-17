@@ -224,7 +224,7 @@
           if (request.readyState == XMLHttpRequest.DONE) {
             let logArr = JSON.parse(request.responseText).logs
             let innerHTML = ''
-            logArr.forEach((log, index) => {
+            logArr.reverse().forEach((log, index) => {
               let elem = `
                 <tr>
                   <td>${log.timestamp}</td>
