@@ -5,6 +5,7 @@ from modules.NetworkController import NetworkController
 from werkzeug.utils import secure_filename
 import os
 import numpy as np
+import csv
 
 
 # For nginx server...
@@ -13,9 +14,6 @@ app = Flask(__name__)
 # For local server...
 # app = Flask(__name__, static_url_path='', static_folder='.',)
 
-# GLOBAL VARIABLES
-log_messages = [{'timestamp': '123 123', 'message': 'Hello world'},
-                {'timestamp': '124 124', 'message': 'Hello world again'}]
 
 '''
 # HOW TO USE TINYDBCONTROLLER:
@@ -28,18 +26,20 @@ TinyDBObj.update('user', 'name', 'c', 'age', 99)
 '''
 
 
-def main():
-    # start TinyDB process & load tables
-    db = TinyDBController()
-    db.load_tables(['user', 'logs'])
+# start TinyDB process & load tables
+db_engine = TinyDBController('./tables',['user', 'logs', 'rules'], True, True)
 
-    # start selenium headless browser & login to Secomapp
-    # selenium = SeleniumController()
-    # selenium.start_browser()
-    # selenium.secomapp_login()
+# start selenium headless browser
+selenium = SeleniumController(True, db_engine)
 
-    # run mlm network engine
-    # mlm_network = NetworkController(db, selenium, 86400)
+# run mlm network engine
+mlm_network = NetworkController(db_engine, selenium, 86400, True)
+
+referral_bonus_rules = [
+    {'name': 'default', 'bonus_tiers': [0.05]},
+    {'name': '*Member Signup Package 1', 'bonus_tiers': [0.08, 0.02, 0.02]},
+    {'name': '*Member Signup Package 2', 'bonus_tiers': [0.16, 0.04, 0.04]},
+]
 
 
 def create_error_response(message, code):
@@ -51,13 +51,24 @@ def create_error_response(message, code):
 def homepage():
     title = "<h2>Sunfresh Referral Tracker is up and running!</h2>"
     status = "<p>Status: All good!</p>"
-    header = "<div style='position: sticky; top: 0; background-color: white;'>{}{}</div>".format(title, status)
-    log = ''
-    for message in log_messages:
-        log += '<li>{}: {}</li>'.format(message['timestamp'], message['message'])
-    log = '<ul>{}</ul>'.format(log)
-    # return header + log
-    return header
+    header = "<div style='position: sticky; top: 7px; " \
+             "background-color: #1474ab; padding: 10px 30px; " \
+             "color: white;'>{}{}</div>".format(title, status)
+    latest_logs = db_engine.get_latest('logs', 20)
+    latest_logs.reverse()
+    logs = ''
+    for log_entry in latest_logs:
+        logs += '<li style="margin-bottom: 10px;">' \
+                '<div class="message-header" style="color: #222">' \
+                '<span class="source" style="margin-right: 15px">[{}]</span>' \
+                '<span class="timestamp">{}</span>' \
+                '</div>' \
+                '<span class="text" style="color: #000">' \
+                '{}' \
+                '</span>' \
+                '</li>'.format(log_entry['source'], log_entry['timestamp'], log_entry['text'])
+    logs = '<ul>{}</ul>'.format(logs)
+    return header + logs
 
 
 app.config["ALLOWED_EXTENSIONS"] = {'csv'}
@@ -68,34 +79,57 @@ def valid_file(filename):
         filename.rsplit('.', 1)[1] in app.config["ALLOWED_EXTENSIONS"]
 
 
-def handle_file_upload(request):
+def handle_csv_upload(request):
     # check if the post request has the file part
     if 'file' not in request.files:
         print('No file part')
-        return (np.array([]), '')
-
+        return
     file = request.files['file']
-    # if user does not select file, browser also
-    # submit an empty part without filename
-    if file.filename == '':
-        print('No selected file')
-        return (np.array([]), file.filename)
 
-    if file and valid_file(file.filename):
-        return (decode_img(file), file.filename)
+    # save csv locally
+    file.save(os.path.join('./uploads', secure_filename(file.filename)))
+
+    # reads csv file with csv reader
+    results = read_csv('./uploads/' + file.filename)
+
+    return results
 
 
-def decode_img(file):
-    print(file)
-    return 'lol'
+def read_csv(filepath):
+    with open(filepath, 'r') as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+
+        # for line in csv_reader:
+            # print(line)
+
+    return 'lol csv'
 
 
 @app.route('/upload-csv', methods=['POST'])
-def ocr_endpoint():
-    # image, filename = handle_file_upload(request)
-    print(request)
+def csv_upload_endpoint():
+    results = handle_csv_upload(request)
+    payload = {"results": 'lol'}
+    response = jsonify(payload)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response, 200
 
-    payload = {"sample": 'lol'}
+
+@app.route('/rebuild-network', methods=['POST'])
+def rebuild_network():
+    selenium.start_browser()
+    selenium.secomapp_login()
+    mlm_network.build_network()
+    selenium.close_browser()
+    payload = {"status": 'success'}
+    response = jsonify(payload)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response, 200
+
+
+@app.route('/logs', methods=['GET'])
+def logs_endpoint():
+    latest_logs = db_engine.get_latest('logs', 10)
+    payload = {"logs": latest_logs}
     response = jsonify(payload)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response, 200
@@ -112,5 +146,4 @@ def method_not_allowed(error):
 
 
 if __name__ == "__main__":
-    main()
     app.run(port=5060)

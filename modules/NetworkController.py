@@ -18,23 +18,26 @@ user object:
 
 
 class NetworkController:
-    def __init__(self, db_controller, selenium_controller, process_interval_seconds):
-        self.process_interval = process_interval_seconds
-        self.running = True
-        self.debug = True
-        self.debug_print("Network Controller initialized!")
+    def __init__(self, db_controller, selenium_controller, process_interval_seconds, manual_process=False):
 
         # getting running Selenium and TinyDB controller instances
         self.selenium = selenium_controller
         self.db = db_controller
 
-        # main process lifecycle
-        while self.running:
-            self.process()
+        self.process_interval = process_interval_seconds
+        self.running = True
+        self.debug = True
+        self.log = True
+        self.debug_print("Network Controller initialized!")
 
-        # terminate lifecycle
-        self.debug_print("Network Controller process terminated.")
-        self.selenium.close_browser()
+        if not manual_process:
+            # main process lifecycle
+            while self.running:
+                self.process()
+
+            # terminate lifecycle
+            self.debug_print("Network Controller process terminated.")
+            self.selenium.close_browser()
 
     def process(self):
         start_time = timer()
@@ -60,15 +63,20 @@ class NetworkController:
 
     def debug_print(self, string):
         prefix = "[NetworkCtrl] {} - ".format(datetime.datetime.now())
+        if self.log: self.db.insert('logs', {
+            'timestamp': str(datetime.datetime.now()),
+            'source': 'NetworkController',
+            'text': string
+        })
         if self.debug: print(prefix + string)
 
     # builds user network from scratch. requires login
     def build_network(self):
         self.debug_print("Building network..")
         self.db.tables['user'].purge_tables()  # clears all entries in table
-        all_users = self.get_all_users()
+        all_users = self.fetch_all_users()
         for user in all_users:
-            user_info = self.get_user_info(user['id'])
+            user_info = self.fetch_user_info(user['id'])
             self.db.insert('user', {
                 'id': user['id'],
                 'first_name': user['first_name'],
@@ -94,12 +102,12 @@ class NetworkController:
         self.debug_print("Build network complete!")
 
     # fetches from secomapp the user's details. requires login.
-    def get_user_info(self, user_id):
+    def fetch_user_info(self, user_id):
         payload = self.selenium.fetch_json('https://af.secomapp.com/admin/affiliates/{}'.format(user_id))
         return payload['data']
 
     # fetches from secomapp a list of all users. requires login.
-    def get_all_users(self):
+    def fetch_all_users(self):
         payload = self.selenium.fetch_json('https://af.secomapp.com/admin/affiliates/datatables')
         return payload['data']
 
@@ -107,6 +115,12 @@ class NetworkController:
     def get_parent(self, user_id):
         user_object = self.db.search('user', 'id', user_id)[0]
         return user_object['parent_id']
+
+    # given an email address, get its user object
+    def get_user_by_email(self, email):
+        user_object = self.db.search('user', 'email', email)[0]
+
+
 
     # get a list of bonus payments towards parent referrers from
     # a particular product purchased by its children

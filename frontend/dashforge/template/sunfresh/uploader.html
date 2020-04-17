@@ -46,6 +46,14 @@
       <div class="container pd-x-0 pd-lg-x-10 pd-xl-x-0">
         <div class="row row-xs">
           <div class="col-12">
+            <div class="mg-b-20">
+              <button id="rebuild-button" type="button" class="btn btn-primary mg-b-20" onclick="rebuildNetwork()">
+              Rebuild Network
+              </button>
+              <p>
+                Rebuilding a network takes a few minutes to complete. Check the rebuilding status <a href="#">here</a>. Make sure you see a "Build network complete!" message from [NetworkController] before proceeding with the upload below.
+              </p>
+            </div>
             <div class="card card-body">
               <div id="drop-area">
                 <form class="my-form">
@@ -158,28 +166,22 @@
       }
 
       function uploadFile(file) {
-        var url = 'https://tracker.api.sunfresh.my/upload-csv'
-        var xhr = new XMLHttpRequest()
-        var formData = new FormData()
-        xhr.open('POST', url, true)
-        xhr.setRequestHeader('Content-type', 'application/json')
-        xhr.setRequestHeader("Access-Control-Allow-Origin", "*")
-        xhr.setRequestHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS, PUT, DELETE")
+        var formData = new FormData();
 
+        // HTML file input, chosen by user
+        formData.append("file", file);
 
-        xhr.addEventListener('readystatechange', function(e) {
-          if (xhr.readyState == 4 && xhr.status == 200) {
-            // Done. Inform the user
-            console.log('done!')
-          }
-          else if (xhr.readyState == 4 && xhr.status != 200) {
-            // Error. Inform the user
-            console.log('err!')
-          }
-        })
+        var request = new XMLHttpRequest();
+        request.open("POST", "http://localhost:5060/upload-csv");
+        request.send(formData);
+      }
 
-        formData.append('file', file)
-        xhr.send(formData)
+      function rebuildNetwork() {
+        document.getElementById('rebuild-button').classList.add('disabled')
+        document.getElementById('rebuild-button').innerText = 'Rebuilding..'
+        let request = new XMLHttpRequest();
+        request.open("POST", "http://localhost:5060/rebuild-network");
+        request.send();
       }
     </script>
   </body>

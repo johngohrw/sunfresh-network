@@ -23,13 +23,14 @@ shopify_store_name = os.getenv('SHOPIFY_STORE_NAME')
 
 
 class SeleniumController:
-    def __init__(self):
+    def __init__(self, log=False, tiny_db_obj=None):
         self.page_load_delay = 4
         self.page_load_interval = 4
         self.action_interval = 4
         self.wait_timeout = 20
         self.debug = True
-        # self.logging = True
+        self.db = tiny_db_obj
+        self.log = log
 
         # uninitialized variables
         self.virtual_display = None
@@ -79,6 +80,11 @@ class SeleniumController:
 
     def debug_print(self, string):
         prefix = "[Selenium] "
+        if self.log: self.db.insert('logs', {
+            'timestamp': str(datetime.datetime.now()),
+            'source': 'Selenium',
+            'text': string
+        })
         if self.debug: print(prefix + string)
 
     def load_page(self, url):
