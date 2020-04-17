@@ -2,11 +2,19 @@ from flask import *
 from modules.TinyDBController import TinyDBController
 from modules.SeleniumController import SeleniumController
 from modules.NetworkController import NetworkController
+from modules.OrderController import OrderController
 from werkzeug.utils import secure_filename
 import os
 import numpy as np
 import csv
 
+referral_bonus_rules = [
+    {'product_name': 'default', 'bonus_tiers': [0.05]},  # applies to all products
+    {'product_name': '*Member Signup Package 1', 'bonus_tiers': [0.08, 0.02, 0.02]},
+    {'product_name': '*Member Signup Package 2', 'bonus_tiers': [0.16, 0.04, 0.04]},
+    {'product_name': 'Member Signup Package 1', 'bonus_tiers': [0.08, 0.02, 0.02]},
+    {'product_name': 'Member Signup Package 2', 'bonus_tiers': [0.16, 0.04, 0.04]},
+]
 
 # For nginx server...
 app = Flask(__name__)
@@ -27,7 +35,7 @@ TinyDBObj.update('user', 'name', 'c', 'age', 99)
 
 
 # start TinyDB process & load tables
-db_engine = TinyDBController('./tables',['user', 'logs', 'rules'], True, True)
+db_engine = TinyDBController('./tables',['user', 'logs', 'rules', 'order_history'], True, True)
 
 # start selenium headless browser
 selenium = SeleniumController(True, db_engine)
@@ -35,11 +43,8 @@ selenium = SeleniumController(True, db_engine)
 # run mlm network engine
 mlm_network = NetworkController(db_engine, selenium, 86400, True)
 
-referral_bonus_rules = [
-    {'name': 'default', 'bonus_tiers': [0.05]},
-    {'name': '*Member Signup Package 1', 'bonus_tiers': [0.08, 0.02, 0.02]},
-    {'name': '*Member Signup Package 2', 'bonus_tiers': [0.16, 0.04, 0.04]},
-]
+# run Order Controller
+order_engine = OrderController(db_engine, mlm_network, referral_bonus_rules)
 
 
 def create_error_response(message, code):
@@ -54,7 +59,7 @@ def homepage():
     header = "<div style='position: sticky; top: 7px; " \
              "background-color: #1474ab; padding: 10px 30px; " \
              "color: white;'>{}{}</div>".format(title, status)
-    latest_logs = db_engine.get_latest('logs', 20)
+    latest_logs = db_engine.get_latest('logs', 50)
     latest_logs.reverse()
     logs = ''
     for log_entry in latest_logs:
@@ -90,24 +95,12 @@ def handle_csv_upload(request):
     file.save(os.path.join('./uploads', secure_filename(file.filename)))
 
     # reads csv file with csv reader
-    results = read_csv('./uploads/' + file.filename)
-
-    return results
-
-
-def read_csv(filepath):
-    with open(filepath, 'r') as csv_file:
-        csv_reader = csv.DictReader(csv_file)
-
-        # for line in csv_reader:
-            # print(line)
-
-    return 'lol csv'
+    order_engine.read_csv('./uploads/' + file.filename)
 
 
 @app.route('/upload-csv', methods=['POST'])
 def csv_upload_endpoint():
-    results = handle_csv_upload(request)
+    handle_csv_upload(request)
     payload = {"results": 'lol'}
     response = jsonify(payload)
     response.headers.add('Access-Control-Allow-Origin', '*')
@@ -128,11 +121,21 @@ def rebuild_network():
 
 @app.route('/logs', methods=['GET'])
 def logs_endpoint():
-    latest_logs = db_engine.get_latest('logs', 10)
+    latest_logs = db_engine.get_latest('logs', 80)
     payload = {"logs": latest_logs}
     response = jsonify(payload)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response, 200
+
+
+@app.route("/get-latest-csv")
+def get_latest_csv():
+    csv_file = order_engine.get_latest_csv()
+    return Response(
+        csv_file,
+        mimetype="text/csv",
+        headers={"Content-disposition":
+                 "attachment; filename=latest_bonus_payments.csv"})
 
 
 @app.errorhandler(404)

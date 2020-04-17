@@ -47,3 +47,7 @@ class TinyDBController:
     def get_latest(self, table_name, n):
         all_entries = self.tables[table_name].all()
         return all_entries[max(len(all_entries) - n, 0): len(all_entries)]
+
+    def exists(self, table_name, query_key, query_value):
+        q = Query()
+        return len(self.tables[table_name].search(q[query_key] == query_value)) > 0

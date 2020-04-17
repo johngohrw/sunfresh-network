@@ -119,8 +119,27 @@ class NetworkController:
     # given an email address, get its user object
     def get_user_by_email(self, email):
         user_object = self.db.search('user', 'email', email)[0]
+        return user_object
 
+    # given email address, get user id. returns 0 if none found
+    def get_user_id_by_email(self, email):
+        search_list = self.db.search('user', 'email', email)
+        if len(search_list) > 0:
+            user_object = search_list[0]
+            return user_object['id']
+        else:
+            return 0
 
+    # given id, get email.
+    def get_email_by_id(self, user_id):
+        print(user_id)
+        print(type(user_id))
+        search_list = self.db.search('user', 'id', user_id)
+        if len(search_list) > 0:
+            user_object = search_list[0]
+            return user_object['email']
+        else:
+            return ''
 
     # get a list of bonus payments towards parent referrers from
     # a particular product purchased by its children
@@ -128,16 +147,19 @@ class NetworkController:
         # example bonus list (8%, 2%, 2%) = [0.08, 0.02, 0.02]
         current_id = user_id
         payments = []
-        for i in range(bonus_list):
-            current_user_obj = self.db.search('user', 'id', current_id)[0]
-            # this user has a parent
-            if current_user_obj['parent_id'] > 0:
-                current_id = current_user_obj['parent_id']  # select the parent
-                payment_amount = bonus_list[i] * product_amount
-                payments.append({'id': current_id, 'payment': payment_amount})  # Add a payment
-            # if this user has no parent, quit the loop
-            else:
-                break
+        for i in range(len(bonus_list)):
+            user_query_list = self.db.search('user', 'id', current_id)
+            # this user is in the db (registered under secomapp)
+            if len(user_query_list) > 0:
+                current_user_obj = user_query_list[0]
+                # this user has a parent
+                if current_user_obj['parent_id'] > 0:
+                    current_id = current_user_obj['parent_id']  # select the parent
+                    payment_amount = bonus_list[i] * product_amount
+                    payments.append({'id': current_id, 'payment': payment_amount, 'commission_percentage': bonus_list[i]})  # Add a payment
+                # if this user has no parent, quit the loop
+                else:
+                    break
         return payments
 
 
