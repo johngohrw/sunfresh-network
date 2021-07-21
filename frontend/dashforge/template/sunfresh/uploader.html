@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="../../assets/img/favicon.png">
+
+    <title>Sunfresh Tracker</title>
+
+    <!-- vendor css -->
+    <link href="../../lib/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="../../lib/ionicons/css/ionicons.min.css" rel="stylesheet">
+    <link href="../../lib/jqvmap/jqvmap.min.css" rel="stylesheet">
+
+    <!-- DashForge CSS -->
+    <link rel="stylesheet" href="../../assets/css/dashforge.css">
+    <link rel="stylesheet" href="../../assets/css/dashforge.dashboard.css">
+  </head>
+  <body class="page-profile">
+
+    <header class="navbar navbar-header navbar-header-fixed">
+      <a href="" id="mainMenuOpen" class="burger-menu"><i data-feather="menu"></i></a>
+      <div class="navbar-brand">
+        <a href="../../index.html" class="df-logo">sun<span>fresh</span></a>
+      </div><!-- navbar-brand -->
+      <div id="navbarMenu" class="navbar-menu-wrapper">
+        <div class="navbar-menu-header">
+          <a href="../../index.html" class="df-logo">sun<span>fresh</span></a>
+          <a id="mainMenuClose" href=""><i data-feather="x"></i></a>
+        </div><!-- navbar-menu-header -->
+        <ul class="nav navbar-menu">
+          <li class="nav-item active">
+            <a href="" class="nav-link"><i data-feather="grid"></i>Dashboard</a>
+          </li>
+        </ul>
+      </div><!-- navbar-menu-wrapper -->
+      <div class="navbar-right">
+      </div><!-- navbar-right -->
+    </header><!-- navbar -->
+
+    <div class="content content-fixed" style="min-height: calc(100vh - 107px);">
+      <div class="container pd-x-0 pd-lg-x-10 pd-xl-x-0">
+
+        <a class="btn btn-primary mg-b-20" href="https://tracker.api.sunfresh.my/get-latest-csv" role="button">Download latest CSV</a>
+
+        <ul class="nav nav-line flex-row">
+          <li class="nav-item">
+            <a class="nav-link active" id="uploader-tab" data-toggle="tab" href="#uploader" role="tab" aria-controls="uploader" aria-selected="true">Uploader</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="rebuild-tab" data-toggle="tab" href="#rebuild" role="tab" aria-controls="rebuild" aria-selected="false">Rebuild</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="log-tab" data-toggle="tab" href="#log" role="tab" aria-controls="log" aria-selected="false">Log</a>
+          </li>
+        </ul>
+        <div class="tab-content bd bd-gray-300 bd-t-0 pd-20" id="myTabContent">
+          <div class="tab-pane fade show active" id="uploader" role="tabpanel" aria-labelledby="uploader-tab">
+            <div id="drop-area">
+              <form class="my-form">
+                <p>Drag and drop to upload your .csv file here</p>
+                <input type="file" id="fileElem" accept=".csv" onchange="handleFiles(this.files)">
+                <label class="button" for="fileElem">Select your .csv file</label>
+              </form>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="rebuild" role="tabpanel" aria-labelledby="rebuild-tab">
+            <div class="mg-b-20">
+              <button id="rebuild-button" type="button" class="btn btn-primary mg-b-20" onclick="rebuildNetwork()">
+              Rebuild Network
+              </button>
+              <p>
+                Rebuilding a network takes a few minutes to complete. You can check the rebuilding status on the 'Log' tab. Make sure you see a "Build network complete!" message from NetworkController before proceeding with the upload.
+              </p>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="log" role="tabpanel" aria-labelledby="log-tab">
+
+            <table class="table" id="log-table">
+              <thead>
+                <tr>
+                  <th scope="col">Timestamp</th>
+                  <th scope="col">Source</th>
+                  <th scope="col">Message</th>
+                </tr>
+              </thead>
+              <tbody id="log-table__body">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+
+        </ul>
+
+      </div><!-- container -->
+    </div><!-- content -->
+
+    <style>
+      #drop-area {
+        border: 2px dashed #ccc;
+        border-radius: 20px;
+        font-family: sans-serif;
+        display: flex;
+        justify-content: center;
+      }
+      #drop-area.highlight {
+        border-color: purple;
+      }
+      p {
+        margin-top: 0;
+      }
+      .my-form {
+        max-width: 400px;
+        margin: 100px;
+      }
+      #gallery {
+        margin-top: 10px;
+      }
+      #gallery img {
+        width: 150px;
+        margin-bottom: 10px;
+        margin-right: 10px;
+        vertical-align: middle;
+      }
+      .button {
+        display: inline-block;
+        padding: 10px;
+        background: #ccc;
+        cursor: pointer;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+      }
+      .button:hover {
+        background: #ddd;
+      }
+      #fileElem {
+        display: none;
+      }
+    </style>
+
+    <footer class="footer">
+      <div>
+        <span>&copy; Sunfresh </span>
+        <span>Developed by <a href="http://nixel.tech">Nixel</a></span>
+      </div>
+    </footer>
+
+    <script src="../../lib/jquery/jquery.min.js"></script>
+    <script src="../../lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../../lib/feather-icons/feather.min.js"></script>
+    <script src="../../lib/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="../../assets/js/dashforge.js"></script>
+
+    <script>
+      let dropArea = document.getElementById('drop-area')
+
+      ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false)
+      })
+
+      function preventDefaults (e) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+
+      ;['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false)
+      })
+
+      ;['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false)
+      })
+
+      function highlight(e) {
+        dropArea.classList.add('highlight')
+      }
+
+      function unhighlight(e) {
+        dropArea.classList.remove('highlight')
+      }
+
+      dropArea.addEventListener('drop', handleDrop, false)
+
+      function handleDrop(e) {
+        let dt = e.dataTransfer
+        let files = dt.files
+
+        handleFiles(files)
+      }
+
+      function handleFiles(files) {
+        ([...files]).forEach(uploadFile)
+      }
+
+      function uploadFile(file) {
+        var formData = new FormData();
+
+        // HTML file input, chosen by user
+        formData.append("file", file);
+
+        var request = new XMLHttpRequest();
+        request.open("POST", "https://tracker.api.sunfresh.my/upload-csv");
+        request.send(formData);
+      }
+
+      function rebuildNetwork() {
+        document.getElementById('rebuild-button').classList.add('disabled')
+        document.getElementById('rebuild-button').innerText = 'Rebuilding..'
+        let request = new XMLHttpRequest();
+        request.open("POST", "https://tracker.api.sunfresh.my/rebuild-network");
+        request.send();
+      }
+
+      function fetchLogs() {
+        console.log('fetching logs..')
+        let request = new XMLHttpRequest();
+        request.open("GET", "https://tracker.api.sunfresh.my/logs");
+        request.onreadystatechange = function() {
+          if (request.readyState == XMLHttpRequest.DONE) {
+            let logArr = JSON.parse(request.responseText).logs
+            let innerHTML = ''
+            logArr.reverse().forEach((log, index) => {
+              let elem = `
+                <tr>
+                  <td>${log.timestamp}</td>
+                  <td>${log.source}</td>
+                  <td>${log.text}</td>
+                </tr>
+              `
+              innerHTML += elem
+            })
+            document.getElementById('log-table__body').innerHTML = innerHTML
+          }
+        }
+        request.send()
+      }
+
+      fetchLogs()
+    </script>
+  </body>
+</html>
